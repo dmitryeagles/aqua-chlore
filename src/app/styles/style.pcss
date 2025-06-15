@@ -1,0 +1,52 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './palette.pcss';
+@import './variables.pcss';
+@import './typography.pcss';
+@import './components.pcss';
+@import './prime.pcss';
+
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+@layer base {
+  html {
+    @apply font-plex text-base leading-5 font-normal text-blackText;
+
+    body {
+      @apply bg-bodyBackground;
+    }
+
+    h1 {
+      @apply h1;
+    }
+    h2 {
+      @apply h2;
+    }
+    h3 {
+      @apply h3;
+    }
+    h4 {
+      @apply h4;
+    }
+    h5 {
+      @apply h5;
+    }
+    h6 {
+      @apply h6;
+    }
+
+    label {
+      @apply text-sm-normal text-surface-500;
+    }
+  }
+}
