@@ -6,7 +6,7 @@ const commonRoutes: Readonly<RouteRecordRaw[]> = [
   {
     path: '/',
     name: RouteNames.HOME,
-    component: () => import('@/pages/Home/Home.vue'),
+    component: () => import('@/pages/Home/HomePage.vue'),
     meta: {
       public: true,
       title: 'nav.home',
@@ -28,14 +28,9 @@ const commonRoutes: Readonly<RouteRecordRaw[]> = [
   },
 ];
 
-
 const router = createRouter({
   history: createWebHistory(),
-  routes: [
-    ...commonRoutes,
-    ...devRoutes,
-  ],
+  routes: [...commonRoutes, ...devRoutes],
 });
-
 
 export default router;

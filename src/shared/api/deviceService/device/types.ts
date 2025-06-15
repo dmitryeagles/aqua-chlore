@@ -1,6 +1,15 @@
 export interface IDevice {
-  id: string;
+  uuid: string;
   name: string;
-  value: string;
-  type: string;
+  dateCreated: Date;
+}
+
+export interface IDeviceMetricValue {
+  uuid: string;
+  value: number | string | boolean;
+  metric: {
+    uuid: string;
+    name: string;
+    type: 'number' | 'string' | 'boolean';
+  };
 }

@@ -1,7 +1,5 @@
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import { ResponseCodes } from '@/shared/lib/constants';
-import { handleApiError, handleApiResponse } from '@/shared/lib/utils';
 
 export interface IRequestConfig extends AxiosRequestConfig {
   accessType?: 'public' | 'private';
@@ -22,43 +20,5 @@ httpClient.interceptors.request.use(async (config) => {
 
   return config;
 });
-
-httpClient.interceptors.response.use(
-  (response) => {
-    try {
-      handleApiResponse(response.data);
-
-      return response;
-    } catch (error) {
-      handleApiError(error);
-    }
-  },
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (!error.response) {
-      handleApiError(error);
-    }
-
-    switch (error.response.status) {
-      case ResponseCodes.UNAUTH:
-        if (!originalRequest.retry) {
-          originalRequest.retry = true;
-
-          return axios(originalRequest);
-        }
-        break;
-      case ResponseCodes.NOT_FOUND:
-        break;
-      case ResponseCodes.FORBIDDEN:
-        break;
-      case ResponseCodes.BAD_GATEWAY:
-      case ResponseCodes.SERVER_ERROR:
-        return handleApiError(error);
-    }
-
-    return Promise.reject(error);
-  },
-);
 
 export default httpClient;
