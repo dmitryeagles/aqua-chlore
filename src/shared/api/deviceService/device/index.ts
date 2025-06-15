@@ -5,16 +5,15 @@ import type * as TDevice from './types';
 
 const controllerPath = '/devicecontroller';
 
-export const getMetrics = async (): Promise<TDevice.IDevice[]> =>
-  httpClient
-    .get<IResponse<TDevice.IDevice[]>>(`/devices`)
-    .then((res) => res.data.values[0]);
+export const getDevices = async (): Promise<TDevice.IDevice[]> =>
+  httpClient.get<TDevice.IDevice[]>(`/devices`).then((res) => res.data);
 
-export const updateMetrics = async ( 
-  value: boolean,
-): Promise<TDevice.IDevice[]> =>
+export const getDeviceMetrics = async (deviceId: string): Promise<TDevice.IDeviceMetricValue[]> =>
   httpClient
-    .post<
-      IResponse<TDevice.IDevice[]>
-    >(`${servicePath}${controllerPath}/updateMetrics`, value)
+    .get<TDevice.IDeviceMetricValue[]>(`/devices/${deviceId}/metrics/values`)
+    .then((res) => res.data);
+
+export const updateMetrics = async (value: boolean): Promise<TDevice.IDevice[]> =>
+  httpClient
+    .post<IResponse<TDevice.IDevice[]>>(`${servicePath}${controllerPath}/updateMetrics`, value)
     .then((res) => res.data.values[0]);
