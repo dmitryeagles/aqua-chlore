@@ -6,11 +6,20 @@ const commonRoutes: Readonly<RouteRecordRaw[]> = [
   {
     path: '/',
     name: RouteNames.HOME,
-    component: () => import('@/pages/Home/HomePage.vue'),
+    component: () => import('@/pages/HomePage/HomePage.vue'),
     meta: {
       public: true,
       title: 'nav.home',
       module: RouteNames.HOME,
+    },
+  },
+  {
+    path: '/:id',
+    name: RouteNames.DEVICE,
+    component: () => import('@/pages/DevicePage/DevicePage.vue'),
+    meta: {
+      public: true,
+      title: 'nav.device',
     },
   },
   {

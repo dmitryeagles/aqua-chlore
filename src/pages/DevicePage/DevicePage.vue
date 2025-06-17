@@ -1,16 +1,18 @@
-<!-- eslint-disable vue/no-static-inline-styles -->
 <script setup lang="ts">
 import { useToast } from 'primevue/usetoast';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { RouteNames } from '@/shared/lib/constants';
 import { useDeviceStore } from '@/shared/stores';
 import { DataCard, UiTypography } from '@/shared/ui';
 
+const route = useRoute();
 const toast = useToast();
 const installationData = ref<any[]>([]);
 const loading = ref(true);
 const error = ref(false);
 const lastUpdate = ref<Date>();
 let pollingInterval: ReturnType<typeof setInterval>;
+
+const deviceId = computed(() => route.params.id as string);
 
 const deviceStore = useDeviceStore();
 
@@ -96,8 +98,7 @@ const fetchData = async () => {
 };
 
 onMounted(() => {
-  deviceStore.fetchDeviceData();
-  fetchData();
+  deviceStore.getMetricsById(deviceId.value);
   pollingInterval = setInterval(fetchData, 5000);
 });
 
@@ -155,6 +156,16 @@ const formattedTime = computed(() => {
         Реальный мониторинг параметров оборудования. Данные обновляются автоматически.
       </UiTypography>
 
+      <RouterLink :to="{ name: RouteNames.HOME }">
+        <Button
+          type="button"
+          variant="text"
+          icon="pi pi-chevron-left"
+          :label="$t('button.back')"
+          class="text-greyText"
+          data-testid="back-btn"
+        />
+      </RouterLink>
       <div class="flex flex-wrap items-center gap-4 bg-surface-50 p-4 rounded-lg">
         <div class="flex items-center gap-2">
           <i
@@ -271,7 +282,7 @@ const formattedTime = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="postcss">
 .container {
   max-width: 1200px;
 }

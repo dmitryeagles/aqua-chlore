@@ -59,6 +59,7 @@ export default [
 
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'vue/no-v-html': 'off',
       'vue/block-lang': [
@@ -86,12 +87,7 @@ export default [
         },
       ],
       'vue/define-props-declaration': ['error', 'type-based'],
-      'vue/no-static-inline-styles': [
-        'error',
-        {
-          allowBinding: false,
-        },
-      ],
+      'vue/no-static-inline-styles': 'off',
     },
   },
 

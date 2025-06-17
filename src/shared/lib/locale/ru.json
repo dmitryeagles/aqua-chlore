@@ -95,7 +95,7 @@
     "project": "проект",
     "delete_contact": "Удалить контакт",
     "delete_project": "Удалить проект",
-    "whom_experience": "опыта работы",
+    "device": "оборудования",
     "whom_restriction": "ограничения",
     "who_restriction": "ограничение",
     "actions_journal": "Журнал действий",
@@ -210,6 +210,7 @@
   },
   "nav": {
     "home": "Главная",
+    "device": "Оборудование",
     "menu": "Меню",
     "profile": "Профиль",
     "guide": "Инструкция",

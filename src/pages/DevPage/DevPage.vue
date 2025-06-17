@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { useConfirm } from 'primevue/useconfirm';
-import {
-  BaseIcon,
-  UiCard,
-  UiTypography,
-} from '@/shared/ui';
+import { BaseIcon, UiCard, UiTypography } from '@/shared/ui';
 import ToastDemo from './ui/ToastDemo.vue';
 
 const confirm = useConfirm();
@@ -37,11 +33,9 @@ const selectedMultySelectItems = ref<string[]>([]);
 watch(selectedMultySelectItems, (newVal) => {
   console.log('selectedMultySelectItems:', newVal);
 });
-
 </script>
 
 <template>
-
   <div class="flex flex-col gap-2">
     <UiTypography
       as="h1"
@@ -57,7 +51,6 @@ watch(selectedMultySelectItems, (newVal) => {
       collapsed
     >
       <div class="flex items-center flex-wrap gap-2 pt-2">
-
         <Button size="large">
           <UiTypography
             as="span"
@@ -330,6 +323,5 @@ watch(selectedMultySelectItems, (newVal) => {
     />
 
     <ToastDemo />
-  
   </div>
 </template>
