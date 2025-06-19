@@ -88,7 +88,10 @@ const CustomAuraPreset = definePreset(Aura, {
           padding-bottom: 1rem;
           overflow: hidden;
         }
-
+        .p-dialog-footer{
+          padding-left: 0px;
+          padding-right: 0px;
+        }
       `,
     },
   },

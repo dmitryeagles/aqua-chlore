@@ -1,7 +1,13 @@
+type DeviceStatus = 'active' | 'warning' | 'error';
+
 export interface IDevice {
   uuid: string;
   name: string;
-  dateCreated: Date;
+  dateCreated: string;
+  representative: string;
+  phone: string;
+  address: string;
+  status: DeviceStatus;
 }
 
 export interface IDeviceMetricValue {
