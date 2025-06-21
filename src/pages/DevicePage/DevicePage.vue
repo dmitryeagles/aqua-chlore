@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { RouteNames } from '@/shared/lib/constants';
 import { useDeviceStore } from '@/shared/stores';
@@ -7,7 +8,6 @@ import { DataCard, UiTypography } from '@/shared/ui';
 const route = useRoute();
 const toast = useToast();
 const installationData = ref<any[]>([]);
-const loading = ref(true);
 const error = ref(false);
 const lastUpdate = ref<Date>();
 let pollingInterval: ReturnType<typeof setInterval>;
@@ -16,57 +16,30 @@ const deviceId = computed(() => route.params.id as string);
 
 const deviceStore = useDeviceStore();
 
+const { isLoadingMetrics, metricsById } = storeToRefs(deviceStore);
+
 const fetchData = async () => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const mockData = [
-      {
-        type: 'TEMPERATURE',
-        name: 'Реактор №1',
-        value: `${Math.floor(250 + Math.random() * 50)}°C`,
-        status: Math.random() > 0.8 ? 'warning' : 'normal',
-        updatedAt: new Date(),
-      },
-      {
-        type: 'PRESSURE',
-        name: 'Компрессор А2',
-        value: `${Math.floor(15 + Math.random() * 5)} атм`,
-        status: Math.random() > 0.9 ? 'critical' : 'normal',
-        updatedAt: new Date(),
-      },
-      {
-        type: 'VOLTAGE',
-        name: 'Генератор Г3',
-        value: `${Math.floor(6000 + Math.random() * 500)} В`,
-        updatedAt: new Date(),
-      },
-      {
-        type: 'CURRENT',
-        name: 'Линия передачи',
-        value: `${Math.floor(1200 + Math.random() * 300)} А`,
-        updatedAt: new Date(),
-      },
-      {
-        type: 'FLOW_RATE',
-        name: 'Трубопровод В4',
-        value: `${Math.floor(120 + Math.random() * 20)} м³/ч`,
-        updatedAt: new Date(),
-      },
-      {
-        type: 'TEMPERATURE',
-        name: 'Охладитель С1',
-        value: `${Math.floor(80 + Math.random() * 10)}°C`,
-        updatedAt: new Date(),
-      },
-    ];
+    await deviceStore.fetchMetricsById(undefined, deviceId.value);
 
     if (installationData.value.length === 0) {
-      installationData.value = mockData;
+      installationData.value = metricsById.value!.map((item) => ({
+        type: item.metric.type.toUpperCase(),
+        name: item.metric.name,
+        value: item.value,
+        status: 'normal', // Placeholder for status
+        updatedAt: new Date(), // Placeholder for updatedAt
+      }));
     } else {
-      mockData.forEach((newItem, index) => {
+      metricsById.value!.forEach((newItem, index) => {
         if (index < installationData.value.length) {
-          Object.assign(installationData.value[index], newItem);
+          Object.assign(installationData.value[index], {
+            type: newItem.metric.type.toUpperCase(),
+            name: newItem.metric.name,
+            value: newItem.value,
+            status: 'normal', // Placeholder for status
+            updatedAt: new Date(), // Placeholder for updatedAt
+          });
         }
       });
     }
@@ -74,7 +47,7 @@ const fetchData = async () => {
     lastUpdate.value = new Date();
     error.value = false;
 
-    if (loading.value) {
+    if (isLoadingMetrics.value) {
       toast.add({
         severity: 'success',
         summary: 'Данные получены',
@@ -92,13 +65,11 @@ const fetchData = async () => {
       detail: 'Не удалось обновить данные',
       life: 5000,
     });
-  } finally {
-    loading.value = false;
   }
 };
 
 onMounted(() => {
-  deviceStore.getMetricsById(deviceId.value);
+  fetchData();
   pollingInterval = setInterval(fetchData, 5000);
 });
 
@@ -214,7 +185,7 @@ const formattedTime = computed(() => {
     </div>
 
     <div
-      v-if="loading"
+      v-if="false"
       class="flex justify-center py-12"
     >
       <ProgressSpinner />

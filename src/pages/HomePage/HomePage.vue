@@ -5,6 +5,7 @@ import { useConfirm } from 'primevue';
 import { useToast } from 'primevue/usetoast';
 import { useI18n } from 'vue-i18n';
 import { DeviceModal } from '@/features';
+import type { DeviceService } from '@/shared/api';
 import { RouteNames } from '@/shared/lib/constants';
 import { useDeviceStore } from '@/shared/stores';
 import { UiTypography } from '@/shared/ui';
@@ -19,48 +20,6 @@ const { isLoadingDevices, devices } = storeToRefs(deviceStore);
 
 const modalVisible = ref(false);
 const editingDevice = ref(null);
-
-console.log(devices.value);
-
-// Моковые данные для демонстрации
-const mockDevices = ref([
-  {
-    uuid: '1',
-    name: 'Трансформатор ТМ-1000',
-    dateCreated: '2023-05-15',
-    representative: 'Иванов Пётр Сергеевич',
-    phone: '+7 (912) 345-67-89',
-    address: 'г. Москва, ул. Ленина, д. 42, кв. 15',
-    status: 'active', // 'active', 'warning', 'error'
-  },
-  {
-    uuid: '2',
-    name: 'Генератор ГС-500',
-    dateCreated: '2023-06-20',
-    representative: 'Сидорова Анна Владимировна',
-    phone: '+7 (923) 456-78-90',
-    address: 'г. Санкт-Петербург, Невский пр-т, д. 100',
-    status: 'warning',
-  },
-  {
-    uuid: '3',
-    name: 'Компрессор ВК-75',
-    dateCreated: '2023-07-10',
-    representative: 'Петров Алексей Дмитриевич',
-    phone: '+7 (934) 567-89-01',
-    address: 'г. Екатеринбург, ул. Малышева, д. 56',
-    status: 'error',
-  },
-  {
-    uuid: '4',
-    name: 'Насос НЦ-12',
-    dateCreated: '2023-08-05',
-    representative: 'Кузнецова Елена Игоревна',
-    phone: '+7 (945) 678-90-12',
-    address: 'г. Новосибирск, ул. Кирова, д. 33',
-    status: 'active',
-  },
-]);
 
 const formatDate = (date: string) => DateTime.fromISO(date).toFormat('dd.MM.yyyy');
 
@@ -117,25 +76,12 @@ const handleDelete = (id: string) => {
   });
 };
 
-const handleAddDevice = (newDevice: any) => {
-  mockDevices.value.unshift(newDevice);
-  toast.add({
-    severity: 'success',
-    summary: 'Успешно',
-    detail: 'Новое оборудование добавлено',
-    life: 3000,
-  });
+const handleAddDevice = (newDevice: DeviceService.TDevice.IDevice) => {
+  deviceStore.createDevice(newDevice);
 };
 
-const handleUpdateDevice = (updatedDevice: any) => {
-  const index = mockDevices.value.findIndex((d) => d.uuid === updatedDevice.uuid);
-
-  if (index !== -1) {
-    mockDevices.value[index] = {
-      ...mockDevices.value[index],
-      ...updatedDevice,
-    };
-  }
+const handleUpdateDevice = (updatedDevice: DeviceService.TDevice.IDevice) => {
+  deviceStore.updateDevice(updatedDevice);
 };
 
 const handleEditClick = (device: any) => {
@@ -213,11 +159,11 @@ onMounted(() => {
     </div>
 
     <div
-      v-else
+      v-else-if="devices"
       class="grid gap-6"
     >
       <div
-        v-for="device in mockDevices"
+        v-for="device in devices"
         :key="device.uuid"
         class="bg-surface-0 border-round-lg shadow-1 p-6"
       >
@@ -339,7 +285,7 @@ onMounted(() => {
       </div>
 
       <div
-        v-if="mockDevices.length === 0"
+        v-if="devices.length === 0"
         class="flex flex-col items-center py-6"
       >
         <i

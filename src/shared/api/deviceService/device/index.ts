@@ -15,8 +15,8 @@ export const deleteDevice = async (deviceId: string): Promise<null> =>
 export const updateMetrics = async (value: boolean): Promise<TDevice.IDevice[]> =>
   httpClient.post<TDevice.IDevice[]>(`/updateMetrics`, value).then((res) => res.data);
 
-export const updateDevice = async (value: TDevice.IDevice): Promise<TDevice.IDevice[]> =>
-  httpClient.post<TDevice.IDevice[]>(`/updateDevices`, value).then((res) => res.data);
+export const updateDevice = async (value: TDevice.IDevice): Promise<TDevice.IDevice> =>
+  httpClient.put<TDevice.IDevice>(`/devices`, value).then((res) => res.data);
 
-export const createDevice = async (value: TDevice.IDevice): Promise<TDevice.IDevice[]> =>
-  httpClient.post<TDevice.IDevice[]>(`/devices`, value).then((res) => res.data);
+export const createDevice = async (value: TDevice.IDevice): Promise<TDevice.IDevice> =>
+  httpClient.post<TDevice.IDevice>(`/devices`, value).then((res) => res.data);

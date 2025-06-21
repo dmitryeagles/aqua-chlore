@@ -11,33 +11,42 @@ export const useDeviceStore = defineStore('device', () => {
     execute: fetchDevices,
   } = useAsyncState(DeviceService.DeviceAPI.getDevices, null, { immediate: false });
 
-  const getMetricsById = async (id: string) => {
-    isLoadingFormButton.value = true;
-    try {
-      const res = await DeviceService.DeviceAPI.getDeviceMetrics(id);
-
-      console.log(res);
-    } finally {
-      isLoadingFormButton.value = false;
-    }
-  };
+  const {
+    state: metricsById,
+    isLoading: isLoadingMetrics,
+    execute: fetchMetricsById,
+  } = useAsyncState((id: string) => DeviceService.DeviceAPI.getDeviceMetrics(id), null, {
+    immediate: false,
+    shallow: false,
+  });
 
   const createDevice = async (value: DeviceService.TDevice.IDevice) => {
     isLoadingFormButton.value = true;
     try {
       const res = await DeviceService.DeviceAPI.createDevice(value);
 
-      devices.value = res;
+      if (!devices.value) {
+        return;
+      }
+      devices.value.unshift(res);
     } finally {
       isLoadingFormButton.value = false;
     }
   };
+
   const updateDevice = async (value: DeviceService.TDevice.IDevice) => {
     isLoadingFormButton.value = true;
     try {
       const res = await DeviceService.DeviceAPI.updateDevice(value);
+      const idx = devices.value?.findIndex((i) => i.uuid === res.uuid);
 
-      devices.value = res;
+      if (!idx || idx === -1) {
+        return;
+      }
+      if (!devices.value) {
+        return;
+      }
+      devices.value[idx] = res;
     } finally {
       isLoadingFormButton.value = false;
     }
@@ -46,6 +55,12 @@ export const useDeviceStore = defineStore('device', () => {
     isLoadingFormButton.value = true;
     try {
       await DeviceService.DeviceAPI.deleteDevice(id);
+
+      if (!devices.value) {
+        return;
+      }
+
+      devices.value = devices.value.filter((i) => i.uuid !== id);
     } finally {
       isLoadingFormButton.value = false;
     }
@@ -53,9 +68,11 @@ export const useDeviceStore = defineStore('device', () => {
 
   return {
     devices,
+    metricsById,
     isLoadingDevices,
+    isLoadingMetrics,
     fetchDevices,
-    getMetricsById,
+    fetchMetricsById,
     createDevice,
     deleteDevice,
     updateDevice,
