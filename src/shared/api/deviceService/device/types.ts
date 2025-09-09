@@ -12,6 +12,7 @@ export interface IDevice {
 
 export interface IDeviceMetricValue {
   uuid: string;
+  date: string;
   value: number | string | boolean;
   metric: {
     uuid: string;

@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { DateTime } from 'luxon';
 import { storeToRefs } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { RouteNames } from '@/shared/lib/constants';
 import { useDeviceStore } from '@/shared/stores';
-import { DataCard, UiTypography } from '@/shared/ui';
+import { DataCard, UiCard, UiTypography } from '@/shared/ui';
 
+const deviceStore = useDeviceStore();
+
+const { isLoadingMetrics, metricsById } = storeToRefs(deviceStore);
 const route = useRoute();
 const toast = useToast();
 const installationData = ref<any[]>([]);
@@ -14,34 +18,34 @@ let pollingInterval: ReturnType<typeof setInterval>;
 
 const deviceId = computed(() => route.params.id as string);
 
-const deviceStore = useDeviceStore();
-
-const { isLoadingMetrics, metricsById } = storeToRefs(deviceStore);
-
-const fetchData = async () => {
+const fetchData = async (upToDate: string | null) => {
   try {
-    await deviceStore.fetchMetricsById(undefined, deviceId.value);
+    await deviceStore.fetchMetricsById(deviceId.value, upToDate);
 
     if (installationData.value.length === 0) {
-      installationData.value = metricsById.value!.map((item) => ({
-        type: item.metric.type.toUpperCase(),
-        name: item.metric.name,
-        value: item.value,
-        status: 'normal', // Placeholder for status
-        updatedAt: new Date(), // Placeholder for updatedAt
-      }));
+      installationData.value = metricsById
+        .value!.filter((i) => i.metric.name !== 'power')
+        .map((item) => ({
+          type: item.metric.type.toUpperCase(),
+          name: item.metric.name,
+          value: item.value,
+          status: 'normal',
+          updatedAt: item.date,
+        }));
     } else {
-      metricsById.value!.forEach((newItem, index) => {
-        if (index < installationData.value.length) {
-          Object.assign(installationData.value[index], {
-            type: newItem.metric.type.toUpperCase(),
-            name: newItem.metric.name,
-            value: newItem.value,
-            status: 'normal', // Placeholder for status
-            updatedAt: new Date(), // Placeholder for updatedAt
-          });
-        }
-      });
+      metricsById
+        .value!.filter((i) => i.metric.name !== 'power')
+        .forEach((newItem, index) => {
+          if (index < installationData.value.length) {
+            Object.assign(installationData.value[index], {
+              type: newItem.metric.type.toUpperCase(),
+              name: newItem.metric.name,
+              value: newItem.value,
+              status: 'normal',
+              updatedAt: newItem.date,
+            });
+          }
+        });
     }
 
     lastUpdate.value = new Date();
@@ -68,14 +72,31 @@ const fetchData = async () => {
   }
 };
 
-onMounted(() => {
-  fetchData();
-  pollingInterval = setInterval(fetchData, 5000);
-});
+const pollingIntervalMs = 5000;
+const lastRequestTime = ref<DateTime>(
+  DateTime.fromFormat('25.06.2025 08:57:21', 'dd.MM.yyyy HH:mm:ss'),
+); // DateTime.now();
 
-onBeforeUnmount(() => {
-  clearInterval(pollingInterval);
-});
+const fetchDataWithTime = async () => {
+  const isoDate = lastRequestTime.value?.toISO();
+
+  await fetchData(isoDate);
+
+  lastRequestTime.value = lastRequestTime.value?.plus({ milliseconds: pollingIntervalMs });
+};
+
+const getStatusIconClass = (value: boolean) => {
+  switch (value) {
+    case true:
+      return 'text-[var(--color-green-500)]';
+    case false:
+      return 'text-[var(--color-rose-500)]';
+  }
+};
+
+const power = computed(() =>
+  metricsById.value ? metricsById.value.find((i) => i.metric.name == 'power') : undefined,
+);
 
 const formattedTime = computed(() => {
   if (!lastUpdate.value) {
@@ -83,6 +104,15 @@ const formattedTime = computed(() => {
   }
 
   return lastUpdate.value.toLocaleTimeString();
+});
+
+onMounted(() => {
+  fetchDataWithTime();
+  pollingInterval = setInterval(fetchDataWithTime, pollingIntervalMs);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(pollingInterval);
 });
 </script>
 
@@ -173,7 +203,7 @@ const formattedTime = computed(() => {
         <Button
           severity="secondary"
           size="small"
-          @click="fetchData"
+          @click="() => fetchDataWithTime()"
         >
           <i
             class="pi pi-refresh"
@@ -213,7 +243,7 @@ const formattedTime = computed(() => {
       </UiTypography>
       <Button
         severity="danger"
-        @click="fetchData"
+        @click="() => fetchDataWithTime()"
       >
         <i
           class="pi pi-refresh"
@@ -222,18 +252,32 @@ const formattedTime = computed(() => {
         <span>Повторить попытку</span>
       </Button>
     </div>
-
-    <div
+    <UiCard
       v-else
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+      border
+      class="data-card"
+      :class="[]"
     >
-      <DataCard
-        v-for="(item, index) in installationData"
-        :key="index"
-        :data="item"
-      />
-    </div>
-
+      <template #header>
+        <div class="flex items-center gap-2">
+          <UiTypography
+            variant="h4"
+            :class="getStatusIconClass(Boolean(power?.value))"
+          >
+            {{ `Выработка хлора: ${power?.value ? 'Включена' : 'Выключена'} ` }}
+          </UiTypography>
+        </div>
+      </template>
+      <template #body>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <DataCard
+            v-for="(item, index) in installationData"
+            :key="index"
+            :data="item"
+          />
+        </div>
+      </template>
+    </UiCard>
     <div class="mt-10 pt-6 border-t border-surface-200">
       <UiTypography
         variant="h2-upper"

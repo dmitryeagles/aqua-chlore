@@ -4,6 +4,8 @@ import { DeviceService } from '@/shared/api';
 
 export const useDeviceStore = defineStore('device', () => {
   const isLoadingFormButton = ref(false);
+  const metricsById = ref<DeviceService.TDevice.IDeviceMetricValue[] | null>(null);
+  const isLoadingMetrics = ref<boolean>(false);
 
   const {
     state: devices,
@@ -11,14 +13,11 @@ export const useDeviceStore = defineStore('device', () => {
     execute: fetchDevices,
   } = useAsyncState(DeviceService.DeviceAPI.getDevices, null, { immediate: false });
 
-  const {
-    state: metricsById,
-    isLoading: isLoadingMetrics,
-    execute: fetchMetricsById,
-  } = useAsyncState((id: string) => DeviceService.DeviceAPI.getDeviceMetrics(id), null, {
-    immediate: false,
-    shallow: false,
-  });
+  const fetchMetricsById = async (id: string, upToDate: string | null) => {
+    isLoadingMetrics.value = true;
+    metricsById.value = await DeviceService.DeviceAPI.getDeviceMetrics(id, upToDate);
+    isLoadingMetrics.value = false;
+  };
 
   const createDevice = async (value: DeviceService.TDevice.IDevice) => {
     isLoadingFormButton.value = true;

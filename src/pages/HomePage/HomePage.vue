@@ -7,11 +7,12 @@ import { useI18n } from 'vue-i18n';
 import { DeviceModal } from '@/features';
 import type { DeviceService } from '@/shared/api';
 import { RouteNames } from '@/shared/lib/constants';
-import { useDeviceStore } from '@/shared/stores';
+import { useAuthStore, useDeviceStore } from '@/shared/stores';
 import { UiTypography } from '@/shared/ui';
 
 const toast = useToast();
 const deviceStore = useDeviceStore();
+const authStore = useAuthStore();
 const { t } = useI18n();
 const confirm = useConfirm();
 const error = ref(false);
@@ -94,6 +95,10 @@ const handleAddClick = () => {
   modalVisible.value = true;
 };
 
+const handleLogout = async () => {
+  await authStore.logout();
+};
+
 onMounted(() => {
   deviceStore.fetchDevices();
 });
@@ -101,22 +106,57 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto px-4 py-8">
-    <div class="mb-8">
-      <UiTypography
-        as="h1"
-        variant="h1-upper"
-        class="text-primary mb-4"
-      >
-        Список оборудования
-      </UiTypography>
+    <!-- Header with auth buttons -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <UiTypography
+          as="h1"
+          variant="h1-upper"
+          class="text-primary mb-2"
+        >
+          Список оборудования
+        </UiTypography>
+        <UiTypography
+          variant="text-base-normal"
+          class="text-surface-600"
+        >
+          Все зарегистрированные в системе единицы оборудования. Для получения детальной информации
+          выберите оборудование из списка.
+        </UiTypography>
+      </div>
 
-      <UiTypography
-        variant="text-base-normal"
-        class="text-surface-600 mb-6"
-      >
-        Все зарегистрированные в системе единицы оборудования. Для получения детальной информации
-        выберите оборудование из списка.
-      </UiTypography>
+      <div class="flex items-center gap-3">
+        <template v-if="authStore.isLoggedIn">
+          <div class="flex items-center gap-2 text-surface-600">
+            <i class="pi pi-user" />
+            <span class="text-sm">{{ authStore.userFullName || 'Пользователь' }}</span>
+          </div>
+          <Button
+            label="Выйти"
+            icon="pi pi-sign-out"
+            severity="secondary"
+            outlined
+            @click="handleLogout"
+          />
+        </template>
+        <template v-else>
+          <RouterLink :to="{ name: RouteNames.SIGNIN }">
+            <Button
+              label="Войти"
+              icon="pi pi-sign-in"
+              severity="primary"
+              outlined
+            />
+          </RouterLink>
+          <RouterLink :to="{ name: RouteNames.SIGNUP }">
+            <Button
+              label="Регистрация"
+              icon="pi pi-user-plus"
+              severity="success"
+            />
+          </RouterLink>
+        </template>
+      </div>
     </div>
 
     <div

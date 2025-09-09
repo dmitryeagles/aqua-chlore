@@ -3,13 +3,8 @@ export interface CreateRequest {
   firstName: string;
   lastName: string;
   middleName?: string | null;
-  gender: boolean;
-  birthDate: string;
-  registrationRegionId: string;
-  eduLevelId: string;
-  haveProfExperience: boolean;
+  phone?: string | null;
   password: string;
-  photo: string;
 }
 
 export interface GetTokenRequest {

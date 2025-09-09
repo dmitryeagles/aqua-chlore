@@ -18,7 +18,33 @@ httpClient.interceptors.request.use(async (config) => {
     return config;
   }
 
+  // Добавляем токен авторизации для приватных запросов
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   return config;
 });
+
+// Интерцептор для обработки ошибок авторизации
+httpClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Токен истек или недействителен
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+
+      // Перенаправляем на страницу входа, если не находимся на публичных страницах
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 export default httpClient;
