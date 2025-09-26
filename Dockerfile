@@ -13,6 +13,9 @@ COPY *.js ./
 COPY *.ts ./
 COPY *.json ./
 
+ARG API_URI
+ENV VITE_APP_API_URL=$API_URI
+
 RUN npm run build
 
 FROM docker.io/nginx:alpine

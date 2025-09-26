@@ -73,9 +73,7 @@ const fetchData = async (upToDate: string | null) => {
 };
 
 const pollingIntervalMs = 5000;
-const lastRequestTime = ref<DateTime>(
-  DateTime.fromFormat('25.06.2025 08:57:21', 'dd.MM.yyyy HH:mm:ss'),
-); // DateTime.now();
+const lastRequestTime = ref<DateTime>(DateTime.now());
 
 const fetchDataWithTime = async () => {
   const isoDate = lastRequestTime.value?.toISO();
